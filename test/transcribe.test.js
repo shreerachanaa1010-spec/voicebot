@@ -84,7 +84,11 @@ test('transcribes a supported multipart audio upload', async () => {
 
   assert.equal(response.statusCode, 200);
   assert.deepEqual(response.body, { text: 'Who is Rachana?' });
-  assert.equal(upstreamForm.get('model'), 'whisper-large-v3-turbo');
+  assert.equal(upstreamForm.get('model'), 'whisper-large-v3');
+  assert.equal(upstreamForm.get('temperature'), '0');
+  assert.equal(upstreamForm.get('response_format'), 'verbose_json');
+  assert.match(upstreamForm.get('prompt'), /Rachana Shree/);
+  assert.match(upstreamForm.get('prompt'), /Who is Rachana/);
   assert.equal(upstreamForm.get('file').type, 'audio/webm');
 });
 

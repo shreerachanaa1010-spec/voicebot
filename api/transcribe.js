@@ -116,8 +116,11 @@ export default async function handler(req, res) {
   try {
     const form = new FormData();
     form.append('file', new Blob([audio.buffer], { type: audio.mimeType }), `question.${audio.extension}`);
-    form.append('model', 'whisper-large-v3-turbo');
+    form.append('model', 'whisper-large-v3');
     form.append('language', 'en');
+    form.append('temperature', '0');
+    form.append('response_format', 'verbose_json');
+    form.append('prompt', 'Transcribe the spoken English verbatim. This is an interview about Rachana Shree H S, usually called Rachana (spelled R-A-C-H-A-N-A). Common questions include "Who is Rachana?" and "Where is Rachana?" Do not answer the questions.');
 
     const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
       method: 'POST',

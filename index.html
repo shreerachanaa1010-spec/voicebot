@@ -457,12 +457,16 @@
             if (activeRecorder.state !== 'recording') return;
             analyser.getByteTimeDomainData(samples);
             const energy = Math.sqrt(samples.reduce((sum, sample) => sum + ((sample - 128) / 128) ** 2, 0) / samples.length);
-            if (energy > 0.025) {
+            if (energy > 0.012) {
               heardVoice = true;
               lastVoiceAt = Date.now();
             }
-            if ((heardVoice && Date.now() - lastVoiceAt > 1300) || (!heardVoice && Date.now() - startedAt > 12_000)) {
+            if (heardVoice && Date.now() - lastVoiceAt > 2800) {
               finishRecording(true);
+            } else if (!heardVoice && Date.now() - startedAt > 12_000) {
+              discardRecording = true;
+              voiceHint.textContent = 'I did not hear speech. Move closer to the microphone and tap to try again.';
+              finishRecording(false);
             }
           }, 160);
           audioContext.resume().catch(() => {});
@@ -511,7 +515,14 @@
 
           if (requestController === controller) requestController = null;
           sendButton.disabled = false;
-          ask(transcript);
+          if (handsFree.checked) {
+            ask(transcript);
+          } else {
+            input.value = transcript;
+            voiceHint.textContent = `I heard: "${transcript}". Edit it if needed, then press Send.`;
+            setReady();
+            input.focus();
+          }
         } catch (error) {
           if (error.name !== 'AbortError') {
             show('assistant', error.message || 'Voice transcription failed. Please try again or type your question.', 'error');
